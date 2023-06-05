@@ -19,7 +19,7 @@ static void    clean_redir(char **av, int savestdin, int savestdout, int savestd
     //t_data *mini;
 char *redirin = "<";
 char *redirout1[] = {">", ">>"};
-char *redirout2[] = {"2>>", "2>"}; //considere "&>" et "&>>" seulement dans 2
+char *redirout2[] = {"2>>", "2>"};
 int i = 0;
 
 while(i <= 2)
@@ -77,7 +77,7 @@ static void    redir_dup(char **av, char *redirin, char **redirout1, char **redi
     {
         savestderr = dup(2);
         close(2);
-        //write(2, "ok\n", 3); //ne s'ecrit pas car sortie stderr fermee (pareil pour en-dessous)
+        //write(2, "ok\n", 3); //ne s'ecrit pas car sortie stderr fermee
         dup2(fd, 2);
        //write(2, "ok\n", 3); //s'ecrit car sterr redirigee vers fd
         break;
@@ -100,8 +100,8 @@ if (pipe(fd) == -1)
 
 /*futur structure, ici juste pour les tests*/
 char *redirin = "<";
-char *redirout1[] = {">", ">>", "&>", "&>>"};
-char *redirout2[] = {"2>>", "2>", "&>", "&>>"};
+char *redirout1[] = {">", ">>"};
+char *redirout2[] = {"2>>", "2>"};
 
 redir_dup(av, redirin, redirout1, redirout2, env_real);
 }
