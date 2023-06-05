@@ -6,7 +6,7 @@
 /*   By: melissaadjogoua <marvin@42.fr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/05 11:08:21 by melissaadjogo     #+#    #+#             */
-/*   Updated: 2023/06/05 14:54:47 by melissaadjogo    ###   ########.fr       */
+/*   Updated: 2023/06/05 16:01:08 by melissaadjogo    ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include <stdio.h>
@@ -368,9 +368,27 @@ void sigquit(int signal)
 		} 
 		else 
 		{
-			write(STDERR_FILENO, "\b\b  \b\b", 6); //revient un caractere en plus '>'	
+			write(STDERR_FILENO, "\b\b  \b\b", 6);		
 		}
 }
+
+/*void sigint(int signal) 
+{
+    if (signal == SIGINT) 
+    {
+            printf("\nCtrl+C (SIGINT) détecté à nouveau\n");
+            //exit(0);   
+    }
+}
+
+void sigquit(int signal) 
+{
+    if (signal == SIGQUIT) 
+    {
+        printf("\nCtrl+\\ (SIGQUIT) a été détecté\n");
+        //exit(0);
+    }
+}*/
 
 void allsignals()
 {
@@ -380,7 +398,7 @@ void allsignals()
 	//signals_d();
 }
 
-int main(int argc, char* argv[], char* envp[]) 
+int ft_pipex(int argc, char* argv[], char* envp[]) 
 {
 	allsignals();
 
@@ -429,9 +447,16 @@ int main(int argc, char* argv[], char* envp[])
 				i++;
 			}
 			close_and_wait(prev_pipe, num_commands);
-			main(argc,argv, envp); //appel recursif pour que le prompteur puisse se reafficher et executer d'autres commandes
+			//line = readline("\033[0;36m\033[1m minishell> \033[0m");
+			ft_pipex(argc,argv, envp);
+			//signals_c_backslash();
 		}
 
 		return 0;
 	}
+}
+
+int main(int ac, char **av, char **envp)
+{
+	ft_pipex(ac, av, envp);
 }
