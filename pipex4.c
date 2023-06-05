@@ -368,7 +368,7 @@ void sigquit(int signal)
 		} 
 		else 
 		{
-			write(STDERR_FILENO, "\b\b  \b\b", 6);		
+			write(STDERR_FILENO, "\b\b  \b\b", 6); //revient un caractere en plus '>'	
 		}
 }
 
@@ -429,7 +429,7 @@ int main(int argc, char* argv[], char* envp[])
 				i++;
 			}
 			close_and_wait(prev_pipe, num_commands);
-			main(argc,argv, envp);
+			main(argc,argv, envp); //appel recursif pour que le prompteur puisse se reafficher et executer d'autres commandes
 		}
 
 		return 0;
