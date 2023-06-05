@@ -372,24 +372,6 @@ void sigquit(int signal)
 		}
 }
 
-/*void sigint(int signal) 
-{
-    if (signal == SIGINT) 
-    {
-            printf("\nCtrl+C (SIGINT) détecté à nouveau\n");
-            //exit(0);   
-    }
-}
-
-void sigquit(int signal) 
-{
-    if (signal == SIGQUIT) 
-    {
-        printf("\nCtrl+\\ (SIGQUIT) a été détecté\n");
-        //exit(0);
-    }
-}*/
-
 void allsignals()
 {
 	signal(SIGINT, sigint);
@@ -447,11 +429,8 @@ int ft_pipex(int argc, char* argv[], char* envp[])
 				i++;
 			}
 			close_and_wait(prev_pipe, num_commands);
-			//line = readline("\033[0;36m\033[1m minishell> \033[0m");
 			ft_pipex(argc,argv, envp);
-			//signals_c_backslash();
 		}
-
 		return 0;
 	}
 }
