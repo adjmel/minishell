@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int	sign_redirection(char *redir) 
+int	found_sign_redir(char *redir) 
 {
 	if (redir == 0)
 		return(-1);
@@ -30,7 +30,7 @@ else if (ft_strcmp(redir, "<<") == 0)
 /*
 Pour tester la fonction
 
-void	sign_redirection(char *redir) 
+void	found_sign_redir(char *redir) 
 {
 
 	if (redir == 0)
@@ -61,5 +61,5 @@ else if (strcmp(redir, "<<") == 0)
 int main(int ac, char **av)
 {
 	(void)ac;
-	sign_redirection(av[1]);
+	found_sign_redir(av[1]);
 }*/
