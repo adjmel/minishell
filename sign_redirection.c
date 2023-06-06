@@ -1,3 +1,8 @@
+#define REDIR_OUT 1
+#define REDIR_OUT_APP 2
+#define REDIR_IN 3
+#define REDIR_HEREDOC 4
+
 #include <stdio.h>
 #include <string.h>
 
