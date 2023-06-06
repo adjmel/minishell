@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+/*anciennes version, pas bon*/
 #include "minishell.h"
 
 /*plus tard, mettre les variables redirin etc dans une structure*/
