@@ -81,27 +81,24 @@ int	found_sign_redir(char *redir)
 		return -1;
 }
 
-static int good_fd_for_redir(char *num_fd, int sign_redir)
+int good_fd_for_redir(char *num_fd, int sign_redir) 
 {
-    if (ft_isdigit(num_fd[0]))
-    {
-        long fd = atol(num_fd);
-        if (fd > INT_MAX)
-        {
-            printf("file descriptor too long\n");
-            return (-1);
-        }
-        return (int)fd;
+    int fd;
+	
+ 	fd = atoi(num_fd);
+    if (ft_isdigit(num_fd[0])) 
+	{
+        return (fd);
+    } 
+	else if (sign_redir == REDIR_OUT || sign_redir == REDIR_OUT_APP) 
+	{
+        fd = STDOUT_FILENO;
+    } 
+	else if (sign_redir == REDIR_IN || sign_redir == REDIR_HEREDOC) 
+	{
+        fd = STDIN_FILENO;
     }
-    else if (sign_redir == REDIR_OUT || sign_redir == REDIR_OUT_APP)
-    {
-        return (STDOUT_FILENO);
-    }
-    else if (sign_redir == REDIR_IN || sign_redir == REDIR_HEREDOC)
-    {
-        return (STDIN_FILENO);
-    }
-    return (-1);
+    return (fd);
 }
 
 static int openfile_sign_redir(char *file, int sign_redir)
