@@ -64,7 +64,7 @@ int ft_execve(char *path, char **args, char *envp[], char **av)
         // Fermer le descripteur de fichier supplémentaire
         close(fd_repl);
 
-        // Supprimer le signe de redirection et le nom de fichier de args
+        // Supprimer le signe de redirection et le nom de fichier de args que le minishell n'essaie pas d'executer le signe de redirection et le file comme des options de la commandes
         args[positionsign] = NULL;
         args[positionsign + 1] = NULL;
     }
