@@ -576,7 +576,7 @@ int run_cd(char **args, char **envp)
 		} 
 		else 
 		{
-			// Chemin relatif
+			// Chemin relatif, ici je constru artificielment un chemin absolu
 			char *cwd = getcwd(NULL, 0);
 			size_t cwd_len = strlen(cwd);
 			size_t arg_len = strlen(args[1]);
