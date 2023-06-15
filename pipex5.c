@@ -659,11 +659,6 @@ int ft_execve(char *path, char **args, char *envp[], char **av)
 		args[positionsign + 1] = NULL;
 	}
 
-	// Vérifie la commande
-	if (strcmp(args[0], "cd") == 0)
-	{
-		run_cd(args, envp);
-	}
 	else if (strcmp(args[0], "pwd") == 0)
 	{
 		set_env(envp, "PWD");
