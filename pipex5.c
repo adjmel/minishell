@@ -6,7 +6,7 @@
 /*   By: melissaadjogoua <marvin@42.fr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 13:29:24 by melissaadjogo     #+#    #+#             */
-/*   Updated: 2023/06/10 19:17:02 by melissaadjogo    ###   ########.fr       */
+/*   Updated: 2023/06/15 12:38:28 by melissaadjogo    ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include <stdio.h>
@@ -51,8 +51,8 @@ sig_atomic_t g_sigsigquit = 0;
 
 typedef struct 
 {
-    int fd_repl;         // Descripteur de fichier à rediriger
-    int fd_repl_dup;     // Copie du descripteur de fichier pour pouvoir le restaurer plus tard
+	int fd_repl;         // Descripteur de fichier à rediriger
+	int fd_repl_dup;     // Copie du descripteur de fichier pour pouvoir le restaurer plus tard
 } t_redir_undo;
 
 int	found_sign_redir(char *redir) 
@@ -78,28 +78,28 @@ int	found_sign_redir(char *redir)
 
 int good_fd_for_redir(char *num_fd, int sign_redir) 
 {
-    int fd;
-	
- 	fd = atoi(num_fd);
-    if (isdigit(num_fd[0])) 
+	int fd;
+
+	fd = atoi(num_fd);
+	if (isdigit(num_fd[0])) 
 	{
-        return (fd);
-    } 
+		return (fd);
+	} 
 	else if (sign_redir == REDIR_OUT || sign_redir == REDIR_OUT_APP) 
 	{
-        fd = STDOUT_FILENO;
-    } 
+		fd = STDOUT_FILENO;
+	} 
 	else if (sign_redir == REDIR_IN || sign_redir == REDIR_HEREDOC) 
 	{
-        fd = STDIN_FILENO;
-    }
-    return (fd);
+		fd = STDIN_FILENO;
+	}
+	return (fd);
 }
 
 static int openfile_sign_redir(char *file, int sign_redir)
 {
 	int fdfinal = 0;
-	
+
 	if (sign_redir == REDIR_HEREDOC)
 	{
 		int pipe_fd[2];
@@ -126,78 +126,78 @@ static int openfile_sign_redir(char *file, int sign_redir)
 	if (fdfinal == -1)
 		printf("Error: Failed to open file or create file descriptor.\n");
 	else
-			printf("fichier ouvert %d\n", fdfinal);
+		printf("fichier ouvert %d\n", fdfinal);
 
 	return (fdfinal);
 }
 
 static int redir_process(char *redir, char *file, t_redir_undo **undo)
 {
-    int status = 0;
-    int fd = good_fd_for_redir(redir, found_sign_redir(redir));  // Obtient le descripteur de fichier associé à la redirection
+	int status = 0;
+	int fd = good_fd_for_redir(redir, found_sign_redir(redir));  // Obtient le descripteur de fichier associé à la redirection
 
-    if (fd == -1)
-        return (-1);
+	if (fd == -1)
+		return (-1);
 
-    int tmp = dup(fd);  // Duplique le descripteur de fichier pour pouvoir le restaurer plus tard
-    if (tmp == -1)  // Vérifie si la duplication a échoué
-        return (printf("Bad file descriptor\n"));
+	int tmp = dup(fd);  // Duplique le descripteur de fichier pour pouvoir le restaurer plus tard
+	if (tmp == -1)  // Vérifie si la duplication a échoué
+		return (printf("Bad file descriptor\n"));
 
-    fd = openfile_sign_redir(file, found_sign_redir(redir));  // Ouvre le fichier spécifié par 'file' en fonction du type de redirection
-    if (fd == -1)
-    {
-        close(tmp);  // Ferme la copie du descripteur de fichier
-        return (-1);
-    }
+	fd = openfile_sign_redir(file, found_sign_redir(redir));  // Ouvre le fichier spécifié par 'file' en fonction du type de redirection
+	if (fd == -1)
+	{
+		close(tmp);  // Ferme la copie du descripteur de fichier
+		return (-1);
+	}
 
-    if (dup2(fd, fd) == -1)  // Redirige le descripteur de fichier 'fd' vers le descripteur du fichier ouvert
-       {
-        status = -1; 
-        printf("Bad file descriptor\n");//print_error_errno(SHELL_NAME, redir, NULL);
-       }
-    close(fd);  // Ferme le descripteur de fichier redirigé
+	if (dup2(fd, fd) == -1)  // Redirige le descripteur de fichier 'fd' vers le descripteur du fichier ouvert
+	{
+		status = -1; 
+		printf("Bad file descriptor\n");//print_error_errno(SHELL_NAME, redir, NULL);
+	}
+	close(fd);  // Ferme le descripteur de fichier redirigé
 
-    if (status != -1)
-    {
-        t_redir_undo *new_undo = malloc(sizeof(t_redir_undo));  // Alloue de la mémoire pour stocker les informations de la redirection
-        if (new_undo == NULL)
-        {
-            close(tmp);
-            return (printf("Bad file descriptor\n"));
-        }
-        new_undo->fd_repl = fd;  // Stocke les informations de redirection
-        new_undo->fd_repl_dup = tmp;
-        *undo = new_undo;  // Stocke les informations de redirection dans le pointeur vers la structure 'undo'
-    }
-    else
-    {
-        close(tmp);  // Ferme la copie du descripteur de fichier
-    }
-    return (status);
+	if (status != -1)
+	{
+		t_redir_undo *new_undo = malloc(sizeof(t_redir_undo));  // Alloue de la mémoire pour stocker les informations de la redirection
+		if (new_undo == NULL)
+		{
+			close(tmp);
+			return (printf("Bad file descriptor\n"));
+		}
+		new_undo->fd_repl = fd;  // Stocke les informations de redirection
+		new_undo->fd_repl_dup = tmp;
+		*undo = new_undo;  // Stocke les informations de redirection dans le pointeur vers la structure 'undo'
+	}
+	else
+	{
+		close(tmp);  // Ferme la copie du descripteur de fichier
+	}
+	return (status);
 }
 
 static int undo_redir(t_redir_undo *undo)
 {
-    if (undo == NULL)
-        return 0;
+	if (undo == NULL)
+		return 0;
 
-    int status = 0;
+	int status = 0;
 
-    if (dup2(undo->fd_repl_dup, undo->fd_repl) == -1)  // Restaure le descripteur de fichier d'origine
-        status = -1;
+	if (dup2(undo->fd_repl_dup, undo->fd_repl) == -1)  // Restaure le descripteur de fichier d'origine
+		status = -1;
 
-    close(undo->fd_repl_dup);  // Ferme la copie du descripteur de fichier
-    free(undo);  // Libère la mémoire allouée pour les informations de redirection
-    return (status);
+	close(undo->fd_repl_dup);  // Ferme la copie du descripteur de fichier
+	free(undo);  // Libère la mémoire allouée pour les informations de redirection
+	return (status);
 }
 
 static void cleanup_redir_undo(t_redir_undo *undo)
 {
-    if (undo != NULL)
-    {
-        close(undo->fd_repl_dup);  // Ferme la copie du descripteur de fichier
-        //free(undo);  // Libère la mémoire allouée pour les informations de redirection
-    }
+	if (undo != NULL)
+	{
+		close(undo->fd_repl_dup);  // Ferme la copie du descripteur de fichier
+								   //free(undo);  // Libère la mémoire allouée pour les informations de redirection
+	}
 }
 
 size_t	ft_strlen(const char *s)
@@ -499,323 +499,214 @@ void	close_and_wait(int *prev_pipe, int num_commands)
 ssize_t find_good_env(char **env_real, const char *env_param)
 {
 	if (!env_real || !env_param)
-        return (-1);
+		return (-1);
 
-    size_t len = strlen(env_param);
-    size_t i = 0;
+	size_t len = strlen(env_param);
+	size_t i = 0;
 
-    while (env_real[i])
-    {
-        if (strncmp(env_real[i], env_param, len) == 0 && env_real[i][len] == '=')
-        {
-            return (i);
-        }
-        i++;
-    }
-    return (-1);
+	while (env_real[i])
+	{
+		if (strncmp(env_real[i], env_param, len) == 0 && env_real[i][len] == '=')
+		{
+			return (i);
+		}
+		i++;
+	}
+	return (-1);
 }
 
 char *recup_env(char **env_real, const char *env_param)
 {
-    ssize_t i = find_good_env(env_real, env_param);
+	ssize_t i = find_good_env(env_real, env_param);
 
-    if (i != -1)
-    {
-        return (strdup(env_real[i] + strlen(env_param) + 1));
-    }
-    return (NULL);
+	if (i != -1)
+	{
+		return (strdup(env_real[i] + strlen(env_param) + 1));
+	}
+	return (NULL);
 }
 
 int set_env(char **env_real, const char *env_param)
 {
-    char *path = recup_env(env_real, env_param);
-    if (path)
-    {
-        printf("%s = %s\n", env_param, path);
-        //free(path);
-        return 0;
-    }
-    else
-    {
-        printf("%s not found\n", env_param);
-        return -1;
-    }
+	char *path = recup_env(env_real, env_param);
+	if (path)
+	{
+		printf("%s = %s\n", env_param, path);
+		free(path);
+		return 0;
+	}
+	else
+	{
+		printf("%s not found\n", env_param);
+		return -1;
+	}
 }
 
-// Obtient le chemin du répertoire home
-static char *get_home_directory()
+static int perform_cd(const char *path, char **envp) 
 {
-    return getenv("HOME");
+	if (chdir(path) == 0) 
+	{
+		char *cwd = getcwd(NULL, 0);
+		setenv("PWD", cwd, 1);
+		free(cwd);
+		return 0;
+	} 		else 
+	{
+		perror("Erreur lors du changement de répertoire");
+		return 1;
+	}
 }
 
-// Obtient le chemin du répertoire précédent (OLDPWD)
-static char *get_previous_directory()
+int run_cd(char **args, char **envp) 
 {
-    return getenv("OLDPWD");
+	if (args[1] && args[2] || !args[1]) 
+		return 1;
+	
+	else 
+	{
+		// Cas où un chemin est spécifié
+		if (args[1][0] == '/') 
+		{
+			perform_cd(args[1], envp);
+			// Chemin absolu
+			/*if (perform_cd(args[1], envp) == 0) 
+			{
+				printf("minishell> PWD = %s\n", getenv("PWD"));
+			}*/
+		} 
+		else 
+		{
+			// Chemin relatif
+			char *cwd = getcwd(NULL, 0);
+			size_t cwd_len = strlen(cwd);
+			size_t arg_len = strlen(args[1]);
+			char *new_path = malloc(cwd_len + arg_len + 2); // +2 pour le slash et le caractère nul
+			strcpy(new_path, cwd);
+			new_path[cwd_len] = '/';
+			strcpy(new_path + cwd_len + 1, args[1]);
+
+			perform_cd(new_path, envp);
+			/*if (perform_cd(new_path, envp) == 0) 
+			{
+				printf("minishell> PWD = %s\n", getenv("PWD"));
+			}*/
+
+			free(new_path);
+			free(cwd);
+		}
+	}
+	return 0;
 }
 
-// Modifie le répertoire courant vers le chemin spécifié
-static int change_directory(const char *path)
-{
-    if (chdir(path) == 0)
-        return 0;
-    return -1;
-}
-
-// Met à jour la variable d'environnement PWD avec le répertoire courant
-/*static void update_pwd()
-{
-    char *pwd = getcwd(NULL, 0);
-    if (pwd)
-    {
-        setenv("PWD", pwd, 1);
-        free(pwd);
-    }
-}*/
-
-static void update_pwd(char **envp)
-{
-    char pwd[PATH_MAX];
-
-    if (getcwd(pwd, sizeof(pwd)) != NULL)
-    {
-        set_env(envp, "PWD"); // Met à jour PWD dans l'environnement global
-		setenv("PWD", pwd, 1); // Met à jour PWD dans la variable d'environnement du processus
-    }
-    else
-    {
-        printf("minishell: cd: Unable to get current directory\n");
-    }
-}
-
-// Effectue la logique de changement de répertoire
-/*static int perform_cd(const char *path, char **envp)
-{
-    if (change_directory(path) != 0)
-    {
-        if (access(path, F_OK) != 0)
-            printf("minishell: cd: %s: No such file or directory\n", path);
-        else if (access(path, R_OK) != 0)
-            printf("minishell: cd: %s: Permission denied\n", path);
-        else
-            printf("minishell: cd: %s: Not a directory\n", path);
-        return 1;
-    }
-
-    update_pwd(envp);
-    return 0;
-}
-
-// Commande cd avec différentes options
-int run_cd(char **args, char **envp)
-{
-    if (args[1] && args[2])
-    {
-        printf("minishell: cd: too many arguments\n");
-        return 1;
-    }
-
-    if (!args[1] || strcmp(args[1], "~") == 0 || strcmp(args[1], "--") == 0)
-    {
-        // Cas où aucun argument n'est spécifié ou "~" ou "--" est utilisé
-        char *home = get_home_directory();
-        if (!home)
-        {
-            printf("minishell: cd: HOME not set\n");
-            return 1;
-        }
-        return perform_cd(home, envp);
-    }
-    else if (strcmp(args[1], "-") == 0)
-    {
-        // Cas où "-" est utilisé pour revenir au répertoire précédent
-        char *prev_dir = get_previous_directory();
-        if (!prev_dir)
-        {
-            printf("minishell: cd: OLDPWD not set\n");
-            return 1;
-        }
-        printf("%s\n", prev_dir);
-        return perform_cd(prev_dir, envp);
-    }
-    else
-    {
-        // Cas où un chemin est spécifié
-        return perform_cd(args[1], envp);
-    }
-}*/
-
-// Effectue la logique de changement de répertoire
-static int perform_cd(const char *path, char **envp)
-{
-    char *old_pwd = getcwd(NULL, 0); // Sauvegarde le répertoire courant
-
-    if (change_directory(path) != 0)
-    {
-        printf("minishell: cd: %s: Unable to change directory\n", path);
-        free(old_pwd); // Libère la mémoire allouée pour old_pwd
-        return 1;
-    }
-
-    update_pwd(envp); // Met à jour la variable d'environnement PWD
-    set_env(envp, "OLDPWD"); // Met à jour OLDPWD dans l'environnement global
-    setenv("OLDPWD", old_pwd, 1); // Met à jour OLDPWD dans la variable d'environnement du processus
-    free(old_pwd); // Libère la mémoire allouée pour old_pwd
-
-    return 0;
-}
-
-
-// Commande cd avec différentes options
-int run_cd(char **args, char **envp)
-{
-    if (args[1] && args[2])
-    {
-        printf("minishell: cd: too many arguments\n");
-        return 1;
-    }
-
-    if (!args[1] || strcmp(args[1], "~") == 0 || strcmp(args[1], "--") == 0)
-    {
-        // Cas où aucun argument n'est spécifié ou "~" ou "--" est utilisé
-        char *home = get_home_directory();
-        if (!home)
-        {
-            printf("minishell: cd: HOME not set\n");
-            return 1;
-        }
-        return perform_cd(home, envp);
-    }
-    else if (strcmp(args[1], "-") == 0)
-    {
-        // Cas où "-" est utilisé pour revenir au répertoire précédent
-        char *prev_dir = get_previous_directory();
-        if (!prev_dir)
-        {
-            printf("minishell: cd: OLDPWD not set\n");
-            return 1;
-        }
-        printf("%s\n", prev_dir);
-        return perform_cd(prev_dir, envp);
-    }
-    else
-    {
-        // Cas où un chemin est spécifié
-        return perform_cd(args[1], envp);
-    }
-}
 
 int ft_execve(char *path, char **args, char *envp[], char **av)
 {
 	(void)av;
-    int i = 0;
-    int redirsign = 0;
-    int positionsign = -1;
+	int i = 0;
+	int redirsign = 0;
+	int positionsign = -1;
 
-    while (args[i])
-    {
-        if (found_sign_redir(args[i]) != -1)
-        {
-            redirsign = found_sign_redir(args[i]);
-            positionsign = i;
-            break;
-        }
-        i++;
-    }
+	while (args[i])
+	{
+		if (found_sign_redir(args[i]) != -1)
+		{
+			redirsign = found_sign_redir(args[i]);
+			positionsign = i;
+			break;
+		}
+		i++;
+	}
 
-    if (positionsign != -1)
-    {
-        char *filename = args[positionsign + 1];
-        int fd_repl = openfile_sign_redir(filename, redirsign);
-        if (fd_repl == -1)
-        {
-            exit(EXIT_FAILURE);
-        }
+	if (positionsign != -1)
+	{
+		char *filename = args[positionsign + 1];
+		int fd_repl = openfile_sign_redir(filename, redirsign);
+		if (fd_repl == -1)
+		{
+			exit(EXIT_FAILURE);
+		}
 
-        t_redir_undo *undo = malloc(sizeof(t_redir_undo));
-        /*if (undo == NULL)
-        {
-            perror("Failed to allocate memory for t_redir_undo");
-            exit(EXIT_FAILURE);
-        }*/
+		t_redir_undo *undo = malloc(sizeof(t_redir_undo));
+		/*if (undo == NULL)
+		  {
+		  perror("Failed to allocate memory for t_redir_undo");
+		  exit(EXIT_FAILURE);
+		  }*/
 
-        undo->fd_repl = good_fd_for_redir(args[positionsign - 1], redirsign);
-        undo->fd_repl_dup = dup(undo->fd_repl);
-        /*if (undo->fd_repl_dup == -1)
-        {
-            perror("Failed to duplicate file descriptor");
-            free(undo);
-            exit(EXIT_FAILURE);
-        }*/
+		undo->fd_repl = good_fd_for_redir(args[positionsign - 1], redirsign);
+		undo->fd_repl_dup = dup(undo->fd_repl);
+		/*if (undo->fd_repl_dup == -1)
+		  {
+		  perror("Failed to duplicate file descriptor");
+		  free(undo);
+		  exit(EXIT_FAILURE);
+		  }*/
 
-        // Rediriger le descripteur de fichier approprié vers fd_repl
-        if (dup2(fd_repl, undo->fd_repl) == -1)
-        {
-            perror("Failed to redirect file descriptor");
-            close(fd_repl);
-            free(undo);
-            exit(EXIT_FAILURE);
-        }
+		// Rediriger le descripteur de fichier approprié vers fd_repl
+		if (dup2(fd_repl, undo->fd_repl) == -1)
+		{
+			perror("Failed to redirect file descriptor");
+			close(fd_repl);
+			free(undo);
+			exit(EXIT_FAILURE);
+		}
 
-        // Fermer le descripteur de fichier supplémentaire
-        close(fd_repl);
+		// Fermer le descripteur de fichier supplémentaire
+		close(fd_repl);
 
-        // Supprimer le signe de redirection et le nom de fichier de args
-        args[positionsign] = NULL;
-        args[positionsign + 1] = NULL;
-    }
+		// Supprimer le signe de redirection et le nom de fichier de args
+		args[positionsign] = NULL;
+		args[positionsign + 1] = NULL;
+	}
 
-	
-	     // Vérifie la commande
-        if (strcmp(args[0], "cd") == 0)
-        {
-			run_cd(args, envp);
-        }
-        else if (strcmp(args[0], "pwd") == 0)
-        {
-            set_env(envp, "PWD");
-        }
+	// Vérifie la commande
+	if (strcmp(args[0], "cd") == 0)
+	{
+		run_cd(args, envp);
+	}
+	else if (strcmp(args[0], "pwd") == 0)
+	{
+		set_env(envp, "PWD");
+	}
 
-
-
-    if (execve(path, args, envp) == -1)
-    {
-        free(path);
-        free(args);
-        write(2, "zsh: command not found\n", 23);
-        exit(EXIT_FAILURE);
-    }
-    return 0;
+	if (execve(path, args, envp) == -1)
+	{
+		free(path);
+		free(args);
+		write(2, "zsh: command not found\n", 23);
+		exit(EXIT_FAILURE);
+	}
+	return 0;
 }
 
 
 void sigint(int signal) 
 {
-(void)signal;
-		if (g_sigpid == 0) 
-		{
-			write(STDERR_FILENO, "\n\033[0;36m\033[1m👍 minishell> \033[0m", 29);
-			g_sigexit_status = 1;
-		} 
-		else 
-		{
-			printf("\n");
-			g_sigexit_status = 130;
-		}
-		g_sigsigint = 1;
+	(void)signal;
+	if (g_sigpid == 0) 
+	{
+		write(STDERR_FILENO, "\n\033[0;36m\033[1m👍 minishell> \033[0m", 29);
+		g_sigexit_status = 1;
+	} 
+	else 
+	{
+		printf("\n");
+		g_sigexit_status = 130;
+	}
+	g_sigsigint = 1;
 }
 
 void sigquit(int signal) 
 {
-(void)signal;
-		if (g_sigsigint) 
-		{
-			g_sigsigint = 1;
-		} 
-		else 
-		{
-			write(STDERR_FILENO, "\b\b  \b\b", 6);		
-		}
+	(void)signal;
+	if (g_sigsigint) 
+	{
+		g_sigsigint = 1;
+	} 
+	else 
+	{
+		write(STDERR_FILENO, "\b\b  \b\b", 6);		
+	}
 }
 
 void allsignals()
@@ -825,51 +716,6 @@ void allsignals()
 	//signal(SIGQUIT, SIG_IGN);
 	//signals_d();
 }
-
-
-/*ssize_t find_good_env(char **env_real, const char *env_param) 
-{
-    if (!env_real || !env_param)
-        return (-1);
-
-    size_t len = strlen(env_param);
-    size_t i = 0;
-
-    while (env_real[i++]) 
-    {
-        if (strncmp(env_real[i], env_param, len) == 0 && env_real[i][len] == '=') 
-        {    
-            return (i);
-        }
-    }
-    return (-1);
-}
-
-char *recup_env(char **env_real, const char *env_param) 
-{
-    ssize_t i = find_good_env(env_real, env_param);
-
-    if (i != -1) 
-    {
-        return (strdup(env_real[i] + strlen(env_param) + 1));
-    }
-    return (NULL);
-}
-
-int exec(char **env_real, char *command)
-{   
-	char    *pwd;
-	char	*pwdcmp;
-
-	pwdcmp = "pwd";
-	if (strncmp(command, pwdcmp, 3) == 0)
-	{
-	pwd = recup_env(env_real, "PWD");
-    return(printf("PWD = %s\n", pwd));
-	}
-	else
-		return(0);
-}*/
 
 int ft_pipex(int argc, char* argv[], char* envp[]) 
 {
@@ -898,9 +744,10 @@ int ft_pipex(int argc, char* argv[], char* envp[])
 				//printf("1 args = %s\n", args[0]);
 				//printf("2 args = %s\n", args[1]);
 				//printf("3 args = %s\n", args[2]);
-		
-	/*ATTENTION PWD ICI*/			//exec(envp, command);
-				
+
+				/*ATTENTION PWD ICI			//exec(envp, command);*/
+
+
 				if (path != NULL) 
 				{
 					not_last_command(i, num_commands, next_pipe);
@@ -914,6 +761,10 @@ int ft_pipex(int argc, char* argv[], char* envp[])
 					else if (child_pid > 0) 
 					{
 						process_father(i, prev_pipe, next_pipe, num_commands);
+						if (strcmp(args[0], "cd") == 0)
+						{
+							run_cd(args, envp);
+						}
 					}
 					else 
 					{
@@ -932,6 +783,7 @@ int ft_pipex(int argc, char* argv[], char* envp[])
 		return 0;
 	}
 }
+
 
 int main(int ac, char **av, char **envp)
 {
