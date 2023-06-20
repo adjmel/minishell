@@ -10,31 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <string.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <signal.h>
-#include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-
+#include <ctype.h>
+#include <limits.h>
 
 #define REDIR_NUM 0
 #define REDIR_FILE 1
@@ -43,7 +32,7 @@
 #define REDIR_IN 3
 #define REDIR_HEREDOC 4
 
-#include <limits.h>
+
 
 typedef struct 
 {
@@ -490,6 +479,91 @@ void	close_and_wait(int *prev_pipe, int num_commands)
 	}
 }
 
+
+
+int check_correct_exit(char **args)
+{
+    int i = 1;
+    int num_args = 1;
+    while (args[i])
+    {
+        num_args++;
+        i++;
+    }
+    if (num_args > 2)
+    {
+        printf("exit: too many arguments\n");
+        return 1;
+    }
+    char *arg = args[1];
+    int j = 0;
+    while (arg[j] != '\0')
+    {
+        if (isalpha(arg[j]))
+        {
+            printf("invalid exit code\n");
+            return 1;
+        }
+        j++;
+    }
+    return 0;
+}
+
+int check_exit_signs(char **args)
+{
+    char *arg = args[1];
+    int i = 0;
+    int count = 0;
+
+    while (arg[i] != '\0')
+    {
+        if (arg[i] == '+' || arg[i] == '-')
+        {
+            count = 1;
+            while (arg[i + 1] == arg[i])
+            {
+                count++;
+                i++;
+            }
+            if (count > 2)
+            {
+                printf("Invalid exit code\n");
+                return (1);
+            }
+        }
+        else
+        {
+            printf("Invalid exit code\n");
+            return (1);
+        }
+        i++;
+    }
+    return 0;
+}
+
+
+int execute_command(char **args) 
+{
+        if (args[1] != NULL) 
+        {
+            // Si un argument est présent, convertissez-le en un nombre entier	
+			if (check_correct_exit(args) == 1 || 
+			check_exit_signs(args) == 1)
+				exit(-1);
+
+            long long exit_code = atoll(args[1]);
+            printf("exit 💙\n");
+            exit(exit_code);
+        } 
+        else 
+        {
+            // Sinon, sortir avec le code de sortie par défaut (0)
+            printf("exit 💚\n");
+            exit(0);
+        }
+     return (1);  
+}
+
 int ft_execve(char *path, char **args, char *envp[], char **av)
 {
 	(void)av;
@@ -549,7 +623,7 @@ int ft_execve(char *path, char **args, char *envp[], char **av)
         args[positionsign] = NULL;
         args[positionsign + 1] = NULL;
     }
-
+    
     if (execve(path, args, envp) == -1)
     {
         free(path);
@@ -618,25 +692,6 @@ int exec(char **env_real, char *command)
 		return(0);
 }
 
-/*void	signals_d()
-{
-	int fd = 0; // Descripteur de fichier correspondant à stdin (entrée standard)
-    char buffer[1]; // Tampon pour lire les données
-    ssize_t bytesRead; // Nombre d'octets lus
-    while ((bytesRead = read(fd, buffer, sizeof(buffer))) > 0) 
-    {
-        // Continue la boucle tant que des octets sont lus depuis stdin
-       
-    }
-    if (bytesRead == 0)
-    {
-        // Si aucun octet n'a été lu, cela signifie que la fin du fichier a été atteinte (EOF)
-        write(2, "exit\n", 5); // Écrit "exit" suivi d'un saut de ligne sur stdout (sortie standard)
-        exit(0); // Quitte le programme avec un code de retour 0 (succès)
-    }
-    exit(1); // Quitte le programme avec un code de retour 0 (succès)
-}*/
-
 void signals_d()
 {
     char buffer[1];
@@ -675,9 +730,11 @@ int ft_pipex(int argc, char* argv[], char* envp[])
 				//printf("1 args = %s\n", args[0]);
 				//printf("2 args = %s\n", args[1]);
 				//printf("3 args = %s\n", args[2]);
-		
-				exec(envp, command);
-				
+					
+ 		   if (strcmp(args[0], "exit") == 0)
+  			{
+    		    execute_command(args);
+    		}
 				if (path != NULL) 
 				{
 					not_last_command(i, num_commands, next_pipe);
@@ -702,7 +759,7 @@ int ft_pipex(int argc, char* argv[], char* envp[])
 			}
 			close_and_wait(prev_pipe, num_commands);
 			//line = readline("\033[0;36m\033[1m minishell> \033[0m");
-			ft_pipex(argc,argv, envp);
+             ft_pipex(argc,argv, envp);
 			//signals_c_backslash();
 		}
 		return 0;
