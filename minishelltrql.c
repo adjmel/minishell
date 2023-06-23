@@ -467,8 +467,9 @@ void	process_father(int i, int *prev_pipe, int *next_pipe, int num_commands)
 
 // Fermeture des descripteurs de fichier restants dans le processus parent
 // et attente de la terminaison de tous les processus enfants
-void	close_and_wait(int *prev_pipe, int num_commands)
+/*void	close_and_wait(int *prev_pipe, int num_commands)
 {
+	 int status;
 	close(prev_pipe[0]);
 	close(prev_pipe[1]);
 
@@ -477,9 +478,76 @@ void	close_and_wait(int *prev_pipe, int num_commands)
 	{
 		wait(NULL);
 	}
+
+	   // Vérifier le statut de sortie du processus enfant
+        if (status == 0) 
+		{
+            // Le processus enfant s'est terminé normalement
+            printf("Code de sortie : 0\n");
+            // Utilisez 0 comme code de sortie pour votre minishell
+        } 
+		else 
+		{
+            // Le processus enfant s'est terminé avec un code de sortie différent de zéro
+            int exit_status = (status >> 8) & 0xFF;
+            printf("Code de sortie : %d\n", exit_status);
+            // Utilisez exit_status comme code de sortie pour votre minishell
+        }
+}*/
+
+/*void close_and_wait(int *prev_pipe, int num_commands)
+{
+    close(prev_pipe[0]);
+    close(prev_pipe[1]);
+
+    int i = 0;
+    int exit_status = 0;
+    pid_t child_pid;
+    while (i < num_commands) {
+        child_pid = wait(&exit_status);
+        i++;
+    }
+
+    // Vérifier le statut de sortie du dernier processus enfant
+    if (WIFEXITED(exit_status)) {
+        // Le dernier processus enfant s'est terminé normalement
+        int child_exit_status = exit_status >> 8;
+        printf("Code de sortie : %d\n", child_exit_status);
+        // Utilisez child_exit_status comme code de sortie pour votre minishell
+    } else {
+        // Le dernier processus enfant ne s'est pas terminé normalement
+        printf("Le dernier processus enfant ne s'est pas terminé normalement.\n");
+    }
+}*/
+
+void close_and_wait(int *prev_pipe, int num_commands)
+{
+    close(prev_pipe[0]);
+    close(prev_pipe[1]);
+
+    int i = 0;
+    int exit_status = 0;
+    pid_t child_pid;
+    while (i < num_commands)
+	{
+        child_pid = waitpid(-1, &exit_status, 0);
+        i++;
+    }
+        // Le dernier processus enfant s'est terminé
+        if (exit_status == 0)
+		{
+            // Le dernier processus enfant s'est terminé normalement
+            printf("Code de sortie : 0\n");
+            // Utilisez 0 comme code de sortie pour votre minishell
+        }
+		else
+		{
+            // Le dernier processus enfant s'est terminé avec un code de sortie différent de zéro
+            int child_exit_status = exit_status >> 8;
+            printf("Code de sortie : %d\n", child_exit_status);
+            // Utilisez child_exit_status comme code de sortie pour votre minishell
+        }
 }
-
-
 
 int check_correct_exit(char **args)
 {
@@ -531,18 +599,12 @@ int check_exit_signs(char **args)
                 return (1);
             }
         }
-        else
-        {
-            printf("Invalid exit code\n");
-            return (1);
-        }
         i++;
     }
     return 0;
 }
 
-
-int execute_command(char **args) 
+int execute_exit(char **args) 
 {
         if (args[1] != NULL) 
         {
@@ -552,10 +614,19 @@ int execute_command(char **args)
 				exit(-1);
 
             long long exit_code = atoll(args[1]);
-            printf("exit 💙\n");
-            exit(exit_code);
+			if (strcmp(args[1], "9223372036854775808") == 0 || 
+				strcmp(args[1], "-9223372036854775808") == 0)
+			{
+					printf("exit: %s numeric argument required\n", args[1]);
+					exit(0);
+			}
+	else 
+		   {
+			 	printf("exit 💙\n");
+            	exit(exit_code);
+		   }
         } 
-        else 
+    else 
         {
             // Sinon, sortir avec le code de sortie par défaut (0)
             printf("exit 💚\n");
@@ -581,7 +652,6 @@ int ft_execve(char *path, char **args, char *envp[], char **av)
         }
         i++;
     }
-
     if (positionsign != -1)
     {
         char *filename = args[positionsign + 1];
@@ -590,7 +660,6 @@ int ft_execve(char *path, char **args, char *envp[], char **av)
         {
             exit(EXIT_FAILURE);
         }
-
         t_redir_undo *undo = malloc(sizeof(t_redir_undo));
         /*if (undo == NULL)
         {
@@ -733,7 +802,7 @@ int ft_pipex(int argc, char* argv[], char* envp[])
 					
  		   if (strcmp(args[0], "exit") == 0)
   			{
-    		    execute_command(args);
+    		    execute_exit(args);
     		}
 				if (path != NULL) 
 				{
