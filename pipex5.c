@@ -559,9 +559,15 @@ static int perform_cd(const char *path, char **envp)
 
 int run_cd(char **args, char **envp) 
 {
-	if (args[1] && args[2] || !args[1]) 
-		return 1;
-	
+	if (args[1] && args[2])
+	{
+		printf("cd: too many arguments\n");
+		return (1);
+	}
+
+	if (!args[1]) 
+		return (1);
+		
 	else 
 	{
 		// Cas où un chemin est spécifié
